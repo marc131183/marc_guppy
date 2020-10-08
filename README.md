@@ -2,7 +2,7 @@
 
 This is a custom guppy for the [gym-guppy environment](https://git.imp.fu-berlin.de/bioroboticslab/robofish/gym-guppy/-/tree/master/).
 
-Models:
+## Models
 
 DQN_256_128_25k_pi-4_7-100_DQNCLIP:
   * degrees = 360
