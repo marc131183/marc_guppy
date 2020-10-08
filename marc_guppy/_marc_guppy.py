@@ -13,10 +13,10 @@ from gym_guppy.tools.math import ray_casting_walls, compute_dist_bins
 
 
 class MarcGuppy(BaseCouzinGuppy, TurnBoostAgent):
-    def __init__(self, model_name, **kwargs):
+    def __init__(self, model_path, **kwargs):
         super().__init__(**kwargs)
-        self._model = DQN.load("models/" + model_name)
-        dic = loadConfig("models/" + model_name + ".json")
+        self._model = DQN.load(model_path)
+        dic = loadConfig(model_path + ".json")
 
         degrees = dic["degrees"]
         num_bins = dic["num_bins_rays"]
