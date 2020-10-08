@@ -1,4 +1,5 @@
 import numpy as np
+import json
 import math
 import sys
 
@@ -12,28 +13,29 @@ from gym_guppy.tools.math import ray_casting_walls, compute_dist_bins
 
 
 class MarcGuppy(BaseCouzinGuppy, TurnBoostAgent):
-    def __init__(self, model_path, **kwargs):
+    def __init__(self, model_name, **kwargs):
         super().__init__(**kwargs)
-        degrees=360
-        num_bins=36 * 2
+        self._model = DQN.load("models/" + model_name)
+        dic = loadConfig("models/" + model_name + ".json")
+
+        degrees = dic["degrees"]
+        num_bins = dic["num_bins_rays"]
+        num_bins_turn_rate = dic["turn_bins"]
+        num_bins_speed = dic["speed_bins"]
+        min_turn_rate = dic["min_turn"]
+        max_turn_rate = dic["max_turn"]
+        min_speed = dic["min_speed"]
+        max_speed = dic["max_speed"]
+
+        self._turn_rate_bins = np.linspace(min_turn_rate, max_turn_rate, num_bins_turn_rate)
+        self._speed_bins = np.linspace(min_speed, max_speed, num_bins_speed)
+
         self.world_bounds = [np.array([-0.5, -0.5]), np.array([0.5, 0.5])]
-        self._model = DQN.load(model_path)
-
-        #has to align with model
-        max_turn_rate = np.pi/2
-        num_bins_turn_rate = 20
-        self._turn_rate_bins = np.linspace(-max_turn_rate, max_turn_rate, num_bins_turn_rate)
-        num_bins_speed = 10
-        max_speed = 0.10
-        self._speed_bins = np.linspace(0.03, max_speed, num_bins_speed)
-
         self.diagonal = np.linalg.norm(self.world_bounds[0] - self.world_bounds[1])
         self.cutoff = np.radians(degrees) / 2.0
         self.sector_bounds = np.linspace(-self.cutoff, self.cutoff, num_bins + 1)
         self.ray_directions = np.linspace(-self.cutoff, self.cutoff, num_bins)
-        # TODO: is this faster than just recreating the array?
         self.obs_placeholder = np.empty((2, num_bins))
-
 
     def compute_next_action(self, state: np.ndarray, kd_tree: cKDTree = None):
         self.obs_placeholder[0] = compute_dist_bins(state[0], state[1:], self.sector_bounds, self.diagonal * 1.1)
@@ -47,3 +49,27 @@ class MarcGuppy(BaseCouzinGuppy, TurnBoostAgent):
 
         self.turn = turn
         self.speed = speed
+
+def saveConfig(path, dic):
+    with open(path, "w+") as f:
+        json.dump(dic, f)
+
+def loadConfig(path):
+    with open(path, "r") as f:
+        return json.load(f)
+
+def main():
+    dic = {
+        "degrees": 360,
+        "num_bins_rays": 72,
+        "turn_bins": 20,
+        "min_turn": -np.pi/2,
+        "max_turn": np.pi/2,
+        "speed_bins": 10,
+        "min_speed": 0.03,
+        "max_speed": 0.1 
+    }
+    saveConfig("models/DQN_256_128_25k_pi-4_7-100_DQNCLIP.json", dic)
+
+if __name__ == "__main__":
+    main()
