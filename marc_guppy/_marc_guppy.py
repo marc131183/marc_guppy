@@ -48,7 +48,7 @@ class MarcGuppy(BaseCouzinGuppy, TurnBoostAgent):
         turn, speed = self._turn_rate_bins[turn_rate], self._speed_bins[speed]
 
         self.turn = turn
-        self.speed = speed
+        self.boost = speed
 
 def saveConfig(path, dic):
     with open(path, "w+") as f:
